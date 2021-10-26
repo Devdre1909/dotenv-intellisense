@@ -1,5 +1,5 @@
 {
-  "name": "dotenv-intellisence",
+	"name": "dotenv-intellisence",
 	"displayName": "dotenv-intellisence",
 	"description": "Intellisense for DotEnv file in JavaScript files",
 	"version": "0.0.1",
@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:dotenv-intellisence.helloWorld"
+		"onCommand:dotenv-intellisence.helloWorld"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -33,19 +33,23 @@
 		"test": "node ./out/test/runTest.js"
 	},
 	"devDependencies": {
-		"@types/vscode": "^1.61.0",
+		"@types/bluebird": "^3.5.36",
 		"@types/glob": "^7.1.4",
 		"@types/mocha": "^9.0.0",
 		"@types/node": "14.x",
+		"@types/vscode": "^1.61.0",
 		"@typescript-eslint/eslint-plugin": "^4.31.1",
 		"@typescript-eslint/parser": "^4.31.1",
+		"@vscode/test-electron": "^1.6.2",
 		"eslint": "^7.32.0",
 		"glob": "^7.1.7",
 		"mocha": "^9.1.1",
-		"typescript": "^4.4.3",
 		"ts-loader": "^9.2.5",
+		"typescript": "^4.4.3",
 		"webpack": "^5.52.1",
-		"webpack-cli": "^4.8.0",
-		"@vscode/test-electron": "^1.6.2"
+		"webpack-cli": "^4.8.0"
+	},
+	"dependencies": {
+		"bluebird": "^3.7.2"
 	}
 }
