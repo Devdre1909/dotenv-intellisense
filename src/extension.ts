@@ -52,68 +52,61 @@ const registerCompletionProvider = (
 
 const defaultDisposables: vscode.Disposable[] = [];
 
-// this method is called when your extension is activated
-// your extension is activated the very first time the command is executed
-export async function activate(context: vscode.ExtensionContext) {
-  // Use the console to output diagnostic information (console.log) and errors (console.error)
-  // This line of code will only be executed once when your extension is activated
-  console.log(
-    'Congratulations, your extension "dotenv-intellisence" is now active!'
+const onActivate = async () => {
+  const envKeys: EnvKeys[] = [];
+
+  // Fetch env files available in workspace
+  const uris: vscode.Uri[] = await Fetcher.findAllEnvFiles();
+
+  if (!uris || uris.length === 0) {
+    console.log("No .env files found");
+    vscode.window.showInformationMessage("No .env files in workspace");
+    return;
+  }
+
+  vscode.window.showInformationMessage(
+    `Found ${uris.length} .env files in your workspace`
   );
 
-  // The command has been defined in the package.json file
-  // Now provide the implementation of the command with registerCommand
-  // The commandId parameter must match the command field in package.json
+  try {
+    await Bluebird.map(configureFileObject(uris), async (uri) => {
+      const fileContent = await readFileSync(uri.filePath, "utf-8");
+      const allLines = extractLines(fileContent);
+      allLines.forEach((line) => {
+        const lineSplit = line.split(";#;");
+        const key = lineSplit[0];
+        const value = lineSplit[1];
+
+        const envKey = new EnvKeys(key, value, uri.fileName, uri.filePath);
+
+        envKeys.push(envKey);
+      });
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+  vscode.window.showInformationMessage(
+    `Found a total of ${envKeys.length} keys, from ${uris.length} files`
+  );
+
+  const provider = (disposable: vscode.Disposable[]) => {
+    languagesSupported.forEach((lang) => {
+      disposable.push(registerCompletionProvider(lang, envKeys));
+    });
+  };
+
+  provider(defaultDisposables);
+};
+
+export async function activate(context: vscode.ExtensionContext) {
+  console.log("Dotenv intellisense activate");
+  onActivate();
+
   let disposable = vscode.commands.registerCommand(
-    "dotenv-intellisence.helloWorld",
+    "dotenv-intellisense.cache",
     async () => {
-      // The code you place here will be executed every time your command is executed
-      // Display a message box to the user
-      vscode.window.showInformationMessage(
-        "Hello World from dotenv-intellisence!"
-      );
-
-      const envKeys: EnvKeys[] = [];
-
-      // Fetch env files available in workspace
-      const uris: vscode.Uri[] = await Fetcher.findAllEnvFiles();
-
-      if (!uris || uris.length === 0) {
-        console.log("No .env files found");
-        vscode.window.showInformationMessage("No .env files in workspace");
-        return;
-      }
-
-      try {
-        await Bluebird.map(configureFileObject(uris), async (uri) => {
-          const fileContent = await readFileSync(uri.filePath, "utf-8");
-          const allLines = extractLines(fileContent);
-          allLines.forEach((line) => {
-            const lineSplit = line.split(";#;");
-            const key = lineSplit[0];
-            const value = lineSplit[1];
-
-            const envKey = new EnvKeys(key, value, uri.fileName, uri.filePath);
-
-            envKeys.push(envKey);
-          });
-        });
-      } catch (error) {
-        console.log(error);
-      }
-
-      console.log(envKeys);
-      vscode.window.showInformationMessage(
-        `Found a total of ${envKeys.length} keys`
-      );
-
-      const provider = (disposable: vscode.Disposable[]) => {
-        languagesSupported.forEach((lang) => {
-          disposable.push(registerCompletionProvider(lang, envKeys));
-        });
-      };
-
-      provider(defaultDisposables);
+      onActivate();
     }
   );
 
