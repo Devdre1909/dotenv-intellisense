@@ -7,7 +7,7 @@ A Visual Studio Code extension that provides auto-completions from contents foun
 - Gives you auto-completion for env keys defined in your workspaces, can scan up to 10 env files
 - Command to manually re-cache env keys definitions if need be
 
-\!\[feature X\]\(images/feature-x.png\)
+![DotenvDemo](/images/demo.gif)
 
 ## Supported Language
 
