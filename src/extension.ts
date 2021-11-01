@@ -53,8 +53,6 @@ const registerCompletionProvider = (
 const defaultDisposables: vscode.Disposable[] = [];
 
 const onActivate = async () => {
-  const envKeys: EnvKeys[] = [];
-
   // Fetch env files available in workspace
   const uris: vscode.Uri[] = await Fetcher.findAllEnvFiles();
 
@@ -67,6 +65,8 @@ const onActivate = async () => {
   vscode.window.showInformationMessage(
     `Found ${uris.length} .env files in your workspace`
   );
+
+  let envKeys: EnvKeys[] = [];
 
   try {
     await Bluebird.map(configureFileObject(uris), async (uri) => {
@@ -87,8 +87,12 @@ const onActivate = async () => {
   }
 
   vscode.window.showInformationMessage(
-    `Found a total of ${envKeys.length} keys, from ${uris.length} files`
+    `Found a total of ${Array.from(envKeys).length} keys, from ${
+      uris.length
+    } files`
   );
+
+  unregisterProviders(defaultDisposables);
 
   const provider = (disposable: vscode.Disposable[]) => {
     languagesSupported.forEach((lang) => {
@@ -101,6 +105,7 @@ const onActivate = async () => {
 
 export async function activate(context: vscode.ExtensionContext) {
   console.log("Dotenv intellisense activate");
+
   onActivate();
 
   let disposable = vscode.commands.registerCommand(
