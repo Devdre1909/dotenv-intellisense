@@ -62,10 +62,11 @@ const onActivate = async () => {
     return;
   }
 
-  vscode.window.showInformationMessage(
-    `Found ${uris.length} .env files in your workspace`
-  );
-
+  if (vscode.workspace.getConfiguration("dotenv-intellisense").debug) {
+    vscode.window.showInformationMessage(
+      `Found ${uris.length} .env files in your workspace`
+    );
+  }
   let envKeys: EnvKeys[] = [];
 
   try {
@@ -85,12 +86,13 @@ const onActivate = async () => {
   } catch (error) {
     console.log(error);
   }
-
-  vscode.window.showInformationMessage(
-    `Found a total of ${Array.from(envKeys).length} keys, from ${
-      uris.length
-    } files`
-  );
+  if (vscode.workspace.getConfiguration("dotenv-intellisense").debug) {
+    vscode.window.showInformationMessage(
+      `Found a total of ${Array.from(envKeys).length} keys, from ${
+        uris.length
+      } files`
+    );
+  }
 
   unregisterProviders(defaultDisposables);
 

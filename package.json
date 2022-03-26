@@ -2,7 +2,7 @@
   "name": "dotenv-intellisense",
   "displayName": "Dotenv Intellisense",
   "description": ".env content completion based on .env files found in your Workspace",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "temitope1909",
   "author": {
     "email": "adegoketemitope1909@gmail.com",
@@ -40,7 +40,17 @@
         "command": "dotenv-intellisense.cache",
         "title": "Dotenv: Cache Again"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Dotenv Intellisense",
+      "properties": {
+        "dotenv-intellisense.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable additional logging."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
