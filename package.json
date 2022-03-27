@@ -2,7 +2,7 @@
   "name": "dotenv-intellisense",
   "displayName": "Dotenv Intellisense",
   "description": ".env content completion based on .env files found in your Workspace",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "publisher": "temitope1909",
   "author": {
     "email": "adegoketemitope1909@gmail.com",
@@ -10,7 +10,7 @@
     "url": "https://temitope.vercel.dev"
   },
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.65.0"
   },
   "keywords": [
     "javascript",
