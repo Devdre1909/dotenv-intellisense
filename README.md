@@ -12,6 +12,7 @@ A Visual Studio Code extension that provides auto-completions from contents foun
 ## Supported Language
 
 - JavaScript
+- TypeScript
 - JavaScript React (.jsx)
 - JavaScript React (.tsx)
 - Vue

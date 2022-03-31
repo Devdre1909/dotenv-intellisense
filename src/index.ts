@@ -25,6 +25,7 @@ export const getFileName = (file: string): string => {
 
 export const languagesSupported = [
   "javascript",
+  "typescript",
   "javascriptreact",
   "typescriptreact",
   "vue",
