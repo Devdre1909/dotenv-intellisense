@@ -2,7 +2,7 @@
   "name": "dotenv-intellisense",
   "displayName": "Dotenv Intellisense",
   "description": ".env content completion based on .env files found in your Workspace",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "publisher": "temitope1909",
   "author": {
     "email": "adegoketemitope1909@gmail.com",
