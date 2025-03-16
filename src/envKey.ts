@@ -2,7 +2,7 @@
 
 import * as vscode from "vscode";
 
-class EnvKeys {
+export class EnvKeys {
   public constructor(
     public key: string,
     public value: string,
