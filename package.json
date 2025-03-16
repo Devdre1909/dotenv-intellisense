@@ -48,6 +48,40 @@
           "type": "boolean",
           "default": false,
           "description": "Enable additional logging."
+        },
+        "dotenv-intellisense.maskValues": {
+          "type": "boolean",
+          "default": true,
+          "description": "Mask sensitive environment variable values in hover tooltips."
+        },
+        "dotenv-intellisense.sensitivePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["key", "password", "token", "secret"],
+          "description": "Patterns to identify sensitive environment variables that should be masked."
+        },
+        "dotenv-intellisense.maxFiles": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of .env files to scan in the workspace."
+        },
+        "dotenv-intellisense.filePatterns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/.env", "**/.env.*"],
+          "description": "Glob patterns to identify .env files."
+        },
+        "dotenv-intellisense.excludedDirs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": ["**/node_modules/**"],
+          "description": "Directories to exclude from .env file scanning."
         }
       }
     }
