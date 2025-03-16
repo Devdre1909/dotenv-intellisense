@@ -7,6 +7,8 @@ import Fetcher from "./fetcher";
 import * as Bluebird from "bluebird";
 import { readFileSync } from "fs";
 import { TextDocument } from "vscode";
+import { EnvHoverProvider } from './providers/hoverProvider';
+import { ValidationService } from './services/validationService';
 
 function configureFileObject(uris: vscode.Uri[]) {
   return uris.map((file) => ({
@@ -15,7 +17,7 @@ function configureFileObject(uris: vscode.Uri[]) {
   }));
 }
 
-const completionTriggerChars = [" ", ".", "env."];
+const completionTriggerChars = ["."];
 
 function unregisterProviders(disposables: vscode.Disposable[]) {
   disposables.forEach((disposable) => disposable.dispose());
@@ -33,6 +35,16 @@ const registerCompletionProvider = (
         document: TextDocument,
         position: vscode.Position
       ): vscode.CompletionItem[] {
+        // Get the text of the current line up to the cursor
+        const linePrefix = document
+          .lineAt(position)
+          .text.substring(0, position.character);
+
+        // Only show completions after "process.env."
+        if (!linePrefix.endsWith("process.env.")) {
+          return [];
+        }
+
         const completionItems = envKeys.map((key) => {
           const completionItem = new vscode.CompletionItem(
             key.key,
@@ -41,6 +53,12 @@ const registerCompletionProvider = (
           completionItem.insertText = key.key;
           completionItem.detail = typeof key.value;
           completionItem.documentation = key.value;
+          // Prevent adding extra space after insertion
+          completionItem.keepWhitespace = true;
+          completionItem.command = {
+            command: "editor.action.triggerSuggest",
+            title: "Re-trigger completions",
+          };
 
           return completionItem;
         });
@@ -53,8 +71,17 @@ const registerCompletionProvider = (
 const defaultDisposables: vscode.Disposable[] = [];
 
 const onActivate = async () => {
-  // Fetch env files available in workspace
-  const uris: vscode.Uri[] = await Fetcher.findAllEnvFiles();
+  const config = vscode.workspace.getConfiguration('dotenv-intellisense');
+  const maxFiles = config.get<number>('maxFiles', 10);
+  const filePatterns = config.get<string[]>('filePatterns', ['**/.env', '**/.env.*']);
+  const excludedDirs = config.get<string[]>('excludedDirs', ['**/node_modules/**']);
+
+  // Fetch env files available in workspace with new configuration
+  const uris: vscode.Uri[] = await vscode.workspace.findFiles(
+    `{${filePatterns.join(',')}}`,
+    `{${excludedDirs.join(',')}}`,
+    maxFiles
+  );
 
   if (!uris || uris.length === 0) {
     console.log("No .env files found");
@@ -96,13 +123,50 @@ const onActivate = async () => {
 
   unregisterProviders(defaultDisposables);
 
+  // Register completion provider
   const provider = (disposable: vscode.Disposable[]) => {
     languagesSupported.forEach((lang) => {
       disposable.push(registerCompletionProvider(lang, envKeys));
+
+      // Register hover provider
+      disposable.push(
+        vscode.languages.registerHoverProvider(
+          lang,
+          new EnvHoverProvider(envKeys)
+        )
+      );
     });
   };
 
   provider(defaultDisposables);
+
+  // Initialize validation service
+  const validationService = new ValidationService(envKeys);
+  defaultDisposables.push({ dispose: () => validationService.dispose() });
+
+  // Validate all open documents
+  vscode.workspace.textDocuments.forEach(doc => {
+    if (languagesSupported.some(lang => doc.languageId === lang)) {
+      validationService.validateDocument(doc);
+    }
+  });
+
+  // Set up document change listeners
+  vscode.workspace.onDidChangeTextDocument(event => {
+    if (languagesSupported.some(lang => event.document.languageId === lang)) {
+      validationService.validateDocument(event.document);
+    }
+  }, null, defaultDisposables);
+
+  vscode.workspace.onDidOpenTextDocument(document => {
+    if (languagesSupported.some(lang => document.languageId === lang)) {
+      validationService.validateDocument(document);
+    }
+  }, null, defaultDisposables);
+
+  vscode.workspace.onDidCloseTextDocument(document => {
+    validationService.clearDiagnostics();
+  }, null, defaultDisposables);
 };
 
 export async function activate(context: vscode.ExtensionContext) {
